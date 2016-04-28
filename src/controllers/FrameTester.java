@@ -31,7 +31,7 @@ public class FrameTester {
     private JButton menuPanel;
     private JButton floor1;
     private JButton cybertorium;
-    private JButton twitter;
+    //private JButton twitter;
     //private ImageIcon twitterIcon;
     private JButton twitterIcon;
 

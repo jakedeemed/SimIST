@@ -5,6 +5,7 @@
  */
 package entities;
 
+import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.GridLayout;
@@ -14,12 +15,14 @@ import java.util.List;
 import twitter4j.Status;
 import javax.swing.*;
 import static javax.swing.JFrame.EXIT_ON_CLOSE;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
+import javax.swing.text.Document;
 import sandbox.KeyReader;
 import twitter4j.Twitter;
 import twitter4j.TwitterException;
 import twitter4j.TwitterFactory;
 import twitter4j.conf.ConfigurationBuilder;
-import twitter4j.util.CharacterUtil;
 /**
  *
  * @author jakedotts
@@ -30,9 +33,10 @@ public class TwitterFeed extends JFrame implements ActionListener{
     JButton getTimeline, sendTweet, timelineBack, tweetBack, tweetPost;
     JTextArea timelineTweets, typeTweet;
     JScrollPane timelineScrollPane, tweetScrollPane;
-    JLabel logoLabel;
-    JPanel twitterPanel;
+    JLabel logoLabel, tweetCounter;
+    JPanel twitterPanel, iconPanel, buttonPanel;
     ImageIcon twitterLogo;
+    Document tweetText;
     
     public TwitterFeed(){
         
@@ -41,7 +45,7 @@ public class TwitterFeed extends JFrame implements ActionListener{
         twitterPanel = new JPanel();
         twitterPanel.setLayout(new GridLayout(1,3));
         
-        logoLabel = new JLabel(new ImageIcon("twitter.png"));
+        logoLabel = new JLabel(new ImageIcon("twitterMini.png"));
         
         getTimeline = new JButton("Get Timeline");
         getTimeline.addActionListener(this);
@@ -80,6 +84,7 @@ public class TwitterFeed extends JFrame implements ActionListener{
         
         if(click.equals(sendTweet)){
             initTweet();
+            tweetCounter();
             twitterFrame.setVisible(false);
         }
         
@@ -112,6 +117,8 @@ public class TwitterFeed extends JFrame implements ActionListener{
             timelineFrame.add(timelineBack, c);
         
         timelineTweets = new JTextArea();
+        Font font = new Font("Gotham Narrow", Font.BOLD, 12);
+        timelineTweets.setFont(font);
         timelineTweets.setEditable(false);
         timelineScrollPane = new JScrollPane(timelineTweets);
             c.fill = GridBagConstraints.HORIZONTAL;
@@ -172,6 +179,14 @@ public class TwitterFeed extends JFrame implements ActionListener{
             c.gridy = 1;
             tweetFrame.add(tweetPost, c);
             
+        tweetCounter = new JLabel("Only 140 characters");
+        tweetCounter.setHorizontalAlignment(JLabel.CENTER);
+            c.fill = GridBagConstraints.HORIZONTAL;
+            c.weightx = 0.5;
+            c.gridx = 1;
+            c.gridy = 1;
+            tweetFrame.add(tweetCounter, c);
+            
         tweetBack = new JButton("Back");
         tweetBack.addActionListener(this);
             c.fill = GridBagConstraints.HORIZONTAL;
@@ -181,10 +196,12 @@ public class TwitterFeed extends JFrame implements ActionListener{
             tweetFrame.add(tweetBack, c);
         
         typeTweet = new JTextArea();
+        Font font = new Font("Gotham Narrow", Font.BOLD, 12);
+        typeTweet.setFont(font);
         tweetScrollPane = new JScrollPane(typeTweet);
             c.fill = GridBagConstraints.HORIZONTAL;
             c.weightx = 0;
-            c.ipady = 200;
+            c.ipady = 100;
             c.gridx = 0;
             c.gridy = 0;
             c.gridwidth = 3;
@@ -197,6 +214,7 @@ public class TwitterFeed extends JFrame implements ActionListener{
         tweetFrame.setVisible(true);
     }
     
+    
     public void postTweet(){
         KeyReader keyreader = new KeyReader();
         
@@ -206,7 +224,7 @@ public class TwitterFeed extends JFrame implements ActionListener{
             cb.setOAuthAccessToken(keyreader.getAccessToken());
             cb.setOAuthAccessTokenSecret(keyreader.getAccessTokenSecret());
         
-        Twitter tf = new TwitterFactory(cb.build()).getInstance();
+        Twitter tf = new TwitterFactory(cb.build()).getInstance(); 
         
         try{
             tf.updateStatus(typeTweet.getText());
@@ -217,4 +235,36 @@ public class TwitterFeed extends JFrame implements ActionListener{
             te.printStackTrace();
         }
     }
+    
+    public void tweetCounter(){
+        
+        typeTweet.getDocument().addDocumentListener(new DocumentListener(){
+            
+            public void changedUpdate(DocumentEvent e) {
+                refresh();
+            }
+
+            public void removeUpdate(DocumentEvent e) {
+                refresh();
+            }
+
+            public void insertUpdate(DocumentEvent e) {
+                refresh();
+            }
+
+            public void refresh() {
+                if(typeTweet.getText().length() > 140){
+                    tweetCounter.setText("you have exceeded your alloted tweet chars!");
+                }
+                else{
+                    tweetCounter.setText(typeTweet.getText().length()+"/ 140");
+                }
+            }
+        });
+        
+    }
+    public void getTwitterTimeline(){
+            initTimeline();
+        }
+      
 }
